@@ -57,6 +57,24 @@ class TestBaseModel_instantiation(unittest.TestCase):
 class TestBaseModel_save(unittest.TestCase):
     """Unittests for testing save method of the BaseModel class."""
 
+    @classmethod
+    def setUp(self):
+        try:
+            os.rename("file.json", "tmp")
+        except IOError:
+            pass
+
+    @classmethod
+    def tearDown(self):
+        try:
+            os.remove("file.json")
+        except IOError:
+            pass
+        try:
+            os.rename("tmp", "file.json")
+        except IOError:
+            pass
+        
     def test_one_save(self):
         bm = BaseModel()
         sleep(0.05)
@@ -74,6 +92,13 @@ class TestBaseModel_save(unittest.TestCase):
         sleep(0.05)
         bm.save()
         self.assertLess(second_updated_at, bm.updated_at)
+
+    def test_save_updates_file(self):
+        bm = BaseModel()
+        bm.save()
+        bmid = "BaseModel." + bm.id
+        with open("file.json", "r") as f:
+            self.assertIn(bmid, f.read())
 
 class TestBaseModel_to_dict(unittest.TestCase):
     """Unittests for testing to_dict method of the BaseModel class."""
